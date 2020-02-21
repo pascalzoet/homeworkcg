@@ -1,11 +1,11 @@
-let scene, camera, renderer;
+let scene, camera, renderer, loader;
 
 init();
 
 // createCube({width: 5, height: 5, depth: 5}, {x: 0, y: 1, z: 0});
 // createPyramid({x: 10, y:10, z: 10});
 
-createHouse({height: 1000, width: 1000, depth: 1000},  {x: 0, y: 1000, z: -2000});
+createHouse({height: 100, width: 100, depth: 100},  {x: 0, y: 50, z: 0});
 
 function init() {
    // Create scene
@@ -14,18 +14,22 @@ function init() {
   camera.position.set(0,0,0);
   renderer = new THREE.WebGLRenderer({antialias:true});
   renderer.setSize(window.innerWidth,window.innerHeight);
+  renderer.shadowMap.enabled = true;
   document.body.appendChild(renderer.domElement);
   let controls = new THREE.OrbitControls(camera);
   controls.addEventListener('change', renderer);
   controls.minDistance = 50;
   controls.maxDistance = 1500;
 
+  var loader = new THREE.TextureLoader();
+
+
    var directions = ["posx.jpg", "negx.jpg", "posy.jpg", "negy.jpg", "posz.jpg", "negz.jpg"];
    var materialArray = [];
    for (var i = 0; i < 6; i++) {
       materialArray.push(
          new THREE.MeshBasicMaterial({
-            map: THREE.ImageUtils.loadTexture("skybox/" + directions[i]),
+            map: THREE.ImageUtils.loadTexture("skybox2/" + directions[i]),
             side: THREE.BackSide
          })
       );
@@ -35,6 +39,22 @@ function init() {
    var skyMaterial = new THREE.MeshFaceMaterial(materialArray);
    var skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
    scene.add(skyBox);
+
+   var groundTexture = loader.load( 'materials/grass.jpg' );
+   groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+   groundTexture.repeat.set( 25, 25 );
+   groundTexture.anisotropy = 16;
+   groundTexture.encoding = THREE.sRGBEncoding;
+
+   var groundMaterial = new THREE.MeshLambertMaterial( { map: groundTexture } );
+
+   var mesh = new THREE.Mesh( new THREE.PlaneBufferGeometry( 5000, 5000 ), groundMaterial );
+   mesh.position.y = 0;
+   mesh.rotation.x = - Math.PI / 2;
+   mesh.receiveShadow = true;
+   scene.add( mesh );
+
+
 
    var ambient = new THREE.AmbientLight(0x404040);
    scene.add(ambient);
@@ -92,10 +112,12 @@ var render = function () {
    renderer.render(scene, camera);
 };
 
+
 // import camera control and rotation library
-controls = new THREE.OrbitControls(camera);
-controls.autoRotate = false;
-controls.noKeys = true;
+controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.maxPolarAngle = Math.PI * 0.5;
+controls.minDistance = 1000;
+controls.maxDistance = 5000;
 
 
 render();
