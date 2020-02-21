@@ -1,27 +1,33 @@
 let scene, camera, renderer, loader;
 
 init();
+createHouse({height: 100, width: 100, depth: 100},  {x: 0, y: 50, z: 1300});
 
-// createCube({width: 5, height: 5, depth: 5}, {x: 0, y: 1, z: 0});
-// createPyramid({x: 10, y:10, z: 10});
-
-createHouse({height: 100, width: 100, depth: 100},  {x: 0, y: 50, z: 0});
+createTree({x: 200, z: 100});
+createTree({x: -400, z: 600});
+createTree({x: 350, z: 200});
 
 function init() {
    // Create scene
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(55,window.innerWidth/window.innerHeight,45,30000);
-  camera.position.set(0,0,0);
+
+  camera = new THREE.PerspectiveCamera(25, window.innerWidth/window.innerHeight, 45, 30000);
+  camera.position.set(0, 1000, 5000);
+
   renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize(window.innerWidth,window.innerHeight);
   renderer.shadowMap.enabled = true;
   document.body.appendChild(renderer.domElement);
-  let controls = new THREE.OrbitControls(camera);
-  controls.addEventListener('change', renderer);
-  controls.minDistance = 50;
-  controls.maxDistance = 1500;
 
-  var loader = new THREE.TextureLoader();
+  // import camera control and rotation library
+   controls = new THREE.OrbitControls(camera, renderer.domElement);
+   controls.maxPolarAngle = 1.5;
+   controls.minDistance = 500;
+   controls.maxDistance = 2000;
+   controls.screenSpacePanning = false;
+
+  loader = new THREE.TextureLoader();
 
 
    var directions = ["posx.jpg", "negx.jpg", "posy.jpg", "negy.jpg", "posz.jpg", "negz.jpg"];
@@ -29,7 +35,7 @@ function init() {
    for (var i = 0; i < 6; i++) {
       materialArray.push(
          new THREE.MeshBasicMaterial({
-            map: THREE.ImageUtils.loadTexture("skybox2/" + directions[i]),
+            map: loader.load("skybox2/" + directions[i]),
             side: THREE.BackSide
          })
       );
@@ -51,16 +57,13 @@ function init() {
    var mesh = new THREE.Mesh( new THREE.PlaneBufferGeometry( 5000, 5000 ), groundMaterial );
    mesh.position.y = 0;
    mesh.rotation.x = - Math.PI / 2;
-   mesh.receiveShadow = true;
    scene.add( mesh );
-
-
 
    var ambient = new THREE.AmbientLight(0x404040);
    scene.add(ambient);
 
    var light = new THREE.DirectionalLight(0xffffff, 1.5);
-   light.position.set(0, 0, 1);
+   light.position.set(0, 100, 0);
    scene.add(light);
 }
 
@@ -82,10 +85,10 @@ function createPyramid(dimension = {height: 4, width: 5}, position = {x: 0, y: 0
 }
 
 function createHouse(dimension = {height, width, depth}, position = {x: 0, y: 0, z: 0}) {
-   var texture_wall = new THREE.TextureLoader().load( 'materials/brick_wall.jpg' );
+   var texture_wall = loader.load( 'materials/brick_wall.jpg' );
    var material_wall = new THREE.MeshBasicMaterial( { map: texture_wall } );
 
-   var texture_door = new THREE.TextureLoader().load( 'materials/door2.jpg' );
+   var texture_door = loader.load( 'materials/door2.jpg' );
    var material_door = new THREE.MeshBasicMaterial( { map: texture_door } );
 
    // Create an array of materials to be used in a cube, one for each side
@@ -103,21 +106,35 @@ function createHouse(dimension = {height, width, depth}, position = {x: 0, y: 0,
    var cubeMaterials = new THREE.MeshFaceMaterial( cubeMaterialArray );
 
    cube = createCube({width: dimension.width, height: dimension.height, depth: dimension.depth}, {x: position.x, y: position.y, z: position.z}, cubeMaterials);
-   createPyramid({width: dimension.width - 2, height: dimension.height * 0.71},{x: position.x, y: position.y + (dimension.height - 1), z:  position.z});
+
+   var texture_roof = loader.load( 'materials/roof.jpg' );
+   texture_roof.repeat.set( 2, 1 );
+   var material_roof = new THREE.MeshBasicMaterial( { map: texture_roof } );
+   createPyramid({width: dimension.width - 2, height: dimension.height * 0.71},{x: position.x, y: position.y + (dimension.height - 1), z:  position.z}, material_roof);
 }
+
+function createTree(position = {x: 0, z: 0}) {
+   var material_tree = new THREE.MeshBasicMaterial({color: 0x00ff00});
+   if (Math.random() >= 0.5) {
+      createPyramid({height: randomInt(20, 100), width: 300}, {x: position.x, y: 190, z:position.z}, material_tree);
+   } else {
+      var randNumb = randomInt(10, 70);
+      createCube({height: randNumb, width: randNumb, depth: randNumb}, {x: position.x, y: 50, z:position.z}, material_tree)
+   }
+
+   var texture_bark = loader.load('materials/bark.jpg');
+   var material_bark = new THREE.MeshBasicMaterial({map: texture_bark});
+   createCube({height: 10, width: 50, depth: 10}, {x: position.x, y: 20, z:position.z}, material_bark);
+}
+
+function randomInt(min, max) {
+   return Math.floor(Math.random() * (max - min + 1) ) + min;
+ }
 
 var render = function () {
    requestAnimationFrame(render);
    controls.update();
    renderer.render(scene, camera);
 };
-
-
-// import camera control and rotation library
-controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.maxPolarAngle = Math.PI * 0.5;
-controls.minDistance = 1000;
-controls.maxDistance = 5000;
-
 
 render();
