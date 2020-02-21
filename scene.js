@@ -5,20 +5,20 @@ init();
 // createCube({width: 5, height: 5, depth: 5}, {x: 0, y: 1, z: 0});
 // createPyramid({x: 10, y:10, z: 10});
 
-createHouse({height: 1000, width: 1000, depth: 1000},  {x: 0, y: 1000, z: -2000});
-
+createHouse({ height: 1000, width: 1000, depth: 1000 }, { x: 0, y: 1000, z: -2000 });
+createLamppost({ radius: 100, height: 1000 }, { x: 100, y: 1000, z: 0 });
 function init() {
    // Create scene
-  scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(55,window.innerWidth/window.innerHeight,45,30000);
-  camera.position.set(0,0,0);
-  renderer = new THREE.WebGLRenderer({antialias:true});
-  renderer.setSize(window.innerWidth,window.innerHeight);
-  document.body.appendChild(renderer.domElement);
-  let controls = new THREE.OrbitControls(camera);
-  controls.addEventListener('change', renderer);
-  controls.minDistance = 50;
-  controls.maxDistance = 1500;
+   scene = new THREE.Scene();
+   camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 45, 30000);
+   camera.position.set(0, 0, 0);
+   renderer = new THREE.WebGLRenderer({ antialias: true });
+   renderer.setSize(window.innerWidth, window.innerHeight);
+   document.body.appendChild(renderer.domElement);
+   let controls = new THREE.OrbitControls(camera);
+   controls.addEventListener('change', renderer);
+   controls.minDistance = 50;
+   controls.maxDistance = 1500;
 
    var directions = ["posx.jpg", "negx.jpg", "posy.jpg", "negy.jpg", "posz.jpg", "negz.jpg"];
    var materialArray = [];
@@ -44,7 +44,7 @@ function init() {
    scene.add(light);
 }
 
-function createCube(dimension, position = {x: 0, y: 0, z: 0}, material =  new THREE.MeshNormalMaterial()) {
+function createCube(dimension, position = { x: 0, y: 0, z: 0 }, material = new THREE.MeshNormalMaterial()) {
    var geometry = new THREE.CubeGeometry(dimension.height, dimension.width, dimension.depth);
    var cube = new THREE.Mesh(geometry, material);
    cube.position.set(position.x, position.y, position.z);
@@ -52,7 +52,7 @@ function createCube(dimension, position = {x: 0, y: 0, z: 0}, material =  new TH
    return cube;
 }
 
-function createPyramid(dimension = {height: 4, width: 5}, position = {x: 0, y: 0, z: 0}, material =  new THREE.MeshNormalMaterial()) {
+function createPyramid(dimension = { height: 4, width: 5 }, position = { x: 0, y: 0, z: 0 }, material = new THREE.MeshNormalMaterial()) {
    var geometry = new THREE.CylinderGeometry(0, dimension.height, dimension.width, 4, 0)
    var pyramid = new THREE.Mesh(geometry, material);
    pyramid.position.set(position.x, position.y, position.z);
@@ -61,29 +61,29 @@ function createPyramid(dimension = {height: 4, width: 5}, position = {x: 0, y: 0
    return pyramid;
 }
 
-function createHouse(dimension = {height, width, depth}, position = {x: 0, y: 0, z: 0}) {
-   var texture_wall = new THREE.TextureLoader().load( 'materials/brick_wall.jpg' );
-   var material_wall = new THREE.MeshBasicMaterial( { map: texture_wall } );
+function createHouse(dimension = { height, width, depth }, position = { x: 0, y: 0, z: 0 }) {
+   var texture_wall = new THREE.TextureLoader().load('materials/brick_wall.jpg');
+   var material_wall = new THREE.MeshBasicMaterial({ map: texture_wall });
 
-   var texture_door = new THREE.TextureLoader().load( 'materials/door2.jpg' );
-   var material_door = new THREE.MeshBasicMaterial( { map: texture_door } );
+   var texture_door = new THREE.TextureLoader().load('materials/door2.jpg');
+   var material_door = new THREE.MeshBasicMaterial({ map: texture_door });
 
    // Create an array of materials to be used in a cube, one for each side
    var cubeMaterialArray = [];
 
    // order to add materials: x+,x-,y+,y-,z+,z-
    for (let index = 0; index < 6; index++) {
-      if(index == 4) {
-         cubeMaterialArray.push( material_door );
+      if (index == 4) {
+         cubeMaterialArray.push(material_door);
       } else {
-         cubeMaterialArray.push( material_wall );
+         cubeMaterialArray.push(material_wall);
       }
    }
 
-   var cubeMaterials = new THREE.MeshFaceMaterial( cubeMaterialArray );
+   var cubeMaterials = new THREE.MeshFaceMaterial(cubeMaterialArray);
 
-   cube = createCube({width: dimension.width, height: dimension.height, depth: dimension.depth}, {x: position.x, y: position.y, z: position.z}, cubeMaterials);
-   createPyramid({width: dimension.width - 2, height: dimension.height * 0.71},{x: position.x, y: position.y + (dimension.height - 1), z:  position.z});
+   cube = createCube({ width: dimension.width, height: dimension.height, depth: dimension.depth }, { x: position.x, y: position.y, z: position.z }, cubeMaterials);
+   createPyramid({ width: dimension.width - 2, height: dimension.height * 0.71 }, { x: position.x, y: position.y + (dimension.height - 1), z: position.z });
 }
 
 var render = function () {
